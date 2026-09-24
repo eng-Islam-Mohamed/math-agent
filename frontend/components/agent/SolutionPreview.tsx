@@ -3,6 +3,7 @@ import katex from "katex";
 import { ChevronDown, ChevronUp, Star } from "lucide-react";
 import "katex/dist/katex.min.css";
 import { AlternativeSolution } from "../../lib/types";
+import { textDirection } from "../../lib/text-direction";
 
 interface SolutionPreviewProps {
   fullSolution: string;
@@ -11,21 +12,14 @@ interface SolutionPreviewProps {
   alternativeSolutions?: AlternativeSolution[];
 }
 
-export default function SolutionPreview({
-  fullSolution,
-  finalAnswer,
-  summary,
-  alternativeSolutions,
-}: SolutionPreviewProps) {
-  const [openAltIndex, setOpenAltIndex] = useState<number | null>(null);
-
-  // Custom parser to split text into math and text blocks and render using KaTeX
-  const renderMathAndText = (text: string) => {
+// Shared renderer for model output and the extracted problem.
+export function renderMathAndText(text: string) {
     if (!text) return null;
 
     let processed = text;
-    processed = processed.replace(/\\\[/g, "$$").replace(/\\\]/g, "$$");
+    processed = processed.replace(/\\\[/g, () => "$$").replace(/\\\]/g, () => "$$");
     processed = processed.replace(/\\\(/g, "$").replace(/\\\)/g, "$");
+    processed = processed.replace(/(\$\$[\s\S]*?\$\$)[ \t]*[.!?،؛؟](?=\s|$)/g, "$1");
 
     const tokens = processed.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g);
 
@@ -37,7 +31,8 @@ export default function SolutionPreview({
           return (
             <div
               key={index}
-              className="my-4 overflow-x-auto overflow-y-hidden max-w-full text-center"
+              dir="ltr"
+              className="math-formula my-4 overflow-x-auto overflow-y-hidden max-w-full text-center"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );
@@ -53,7 +48,8 @@ export default function SolutionPreview({
           return (
             <span
               key={index}
-              className="inline-block px-0.5"
+              dir="ltr"
+              className="math-formula inline-block px-0.5"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           );
@@ -68,20 +64,29 @@ export default function SolutionPreview({
         </span>
       );
     });
-  };
+}
+
+export default function SolutionPreview({
+  fullSolution,
+  finalAnswer,
+  summary,
+  alternativeSolutions,
+}: SolutionPreviewProps) {
+  const [openAltIndex, setOpenAltIndex] = useState<number | null>(null);
+  const plainArabicEquation = /^\s*[\u0621-\u064A]\s*=\s*[-+\d\u0660-\u0669.,]+\s*$/u.test(finalAnswer);
 
   return (
     <div className="w-full max-w-4xl space-y-6">
       {/* Summary Card */}
       <div className="bg-slate-950/60 backdrop-blur-xl border border-slate-900 rounded-xl p-5 md:p-6 space-y-2">
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Solution Summary</h3>
-        <p className="text-sm text-slate-300 leading-relaxed font-sans">{summary}</p>
+        <div dir={textDirection(summary)} className="multilingual-text text-sm text-slate-300 leading-relaxed">{renderMathAndText(summary)}</div>
       </div>
 
       {/* Full Detailed Solution */}
       <div className="bg-slate-950/60 backdrop-blur-xl border border-slate-900 rounded-2xl p-6 md:p-8 space-y-4">
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detailed Derivation</h3>
-        <div className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-2">
+        <div dir={textDirection(fullSolution)} className="multilingual-text prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-2">
           {renderMathAndText(fullSolution)}
         </div>
       </div>
@@ -92,7 +97,7 @@ export default function SolutionPreview({
         <div className="absolute inset-0 bg-blue-500/5 blur-2xl rounded-full" />
         
         <h3 className="relative text-xs font-semibold text-blue-400 uppercase tracking-wider">Final Answer</h3>
-        <div className="relative text-lg md:text-xl font-bold text-slate-100 font-mono">
+        <div dir={plainArabicEquation ? "ltr" : textDirection(finalAnswer)} className="multilingual-text relative text-lg md:text-xl font-bold text-slate-100">
           {renderMathAndText(finalAnswer)}
         </div>
       </div>

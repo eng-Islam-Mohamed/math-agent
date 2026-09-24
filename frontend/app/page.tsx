@@ -4,9 +4,10 @@ import { useState } from "react";
 import { AlertCircle, BrainCircuit, CheckCircle2, Compass, FileDown, RefreshCw, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 import AgentInputCard from "../components/agent/AgentInputCard";
-import SolutionPreview from "../components/agent/SolutionPreview";
+import SolutionPreview, { renderMathAndText } from "../components/agent/SolutionPreview";
 import { Boxes } from "../components/ui/background-boxes";
 import { AdvancedSolveOptions, InputType } from "../lib/types";
+import { textDirection } from "../lib/text-direction";
 
 type Result = {
   inputType: InputType;
@@ -95,15 +96,15 @@ export default function Home() {
           </div>
           <div className="w-full max-w-4xl space-y-5 rounded-2xl border border-slate-900 bg-slate-950/80 p-6 shadow-xl md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div><p className="text-xs font-bold uppercase tracking-wider text-blue-400">{result.solution.field}</p><h2 className="mt-2 text-xl font-bold text-slate-100">{result.solution.title}</h2></div>
+              <div className="min-w-0 flex-1"><p dir={textDirection(result.solution.field)} className="multilingual-text text-xs font-bold uppercase tracking-wider text-blue-400">{result.solution.field}</p><h2 dir={textDirection(result.solution.title)} className="multilingual-text mt-2 text-xl font-bold text-slate-100">{result.solution.title}</h2></div>
               <button onClick={() => window.print()} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 print:hidden"><FileDown size={15} />Save as PDF</button>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Problem read from your input</p><p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">{result.cleanedProblem}</p></div>
+            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Problem read from your input</p><div dir={textDirection(result.cleanedProblem)} className="multilingual-text mt-2 whitespace-pre-wrap text-sm text-slate-200">{renderMathAndText(result.cleanedProblem)}</div></div>
           </div>
           <SolutionPreview fullSolution={result.solution.steps.map((step, i) => `${i + 1}. ${step}`).join("\n\n")} finalAnswer={result.solution.answer} summary={result.solution.summary} />
           <div className={`flex w-full max-w-4xl items-start gap-3 rounded-xl border p-5 ${result.review.correct ? "border-emerald-500/20 bg-emerald-500/5" : "border-amber-500/20 bg-amber-500/5"}`}>
             {result.review.correct ? <CheckCircle2 className="shrink-0 text-emerald-400" size={19} /> : <ShieldAlert className="shrink-0 text-amber-400" size={19} />}
-            <div><h3 className="text-sm font-semibold text-slate-200">Independent AI review</h3><p className="mt-1 text-sm text-slate-400">{result.review.note}</p><p className="mt-2 text-xs text-slate-500">AI review is not a formal proof. Check important work independently.</p></div>
+            <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold text-slate-200">Independent AI review</h3><div dir={textDirection(result.review.note)} className="multilingual-text mt-1 text-sm text-slate-400">{renderMathAndText(result.review.note)}</div><p className="mt-2 text-xs text-slate-500">AI review is not a formal proof. Check important work independently.</p></div>
           </div>
         </motion.div>}
       </div>

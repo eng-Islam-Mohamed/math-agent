@@ -3,6 +3,7 @@ import { Sparkles, FileText, Image as ImageIcon, Music, AlertCircle, BookOpen, S
 import { motion } from "framer-motion";
 import FileDropzone from "./FileDropzone";
 import { AdvancedSolveOptions, InputType } from "../../lib/types";
+import { textDirection } from "../../lib/text-direction";
 
 interface AgentInputCardProps {
   onSolve: (
@@ -247,11 +248,12 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
               </label>
               <textarea
                 id="problem"
+                dir={textDirection(textProblem)}
                 rows={5}
                 value={textProblem}
                 onChange={(e) => setTextProblem(e.target.value)}
                 placeholder="Example: Solve 2x + 5 = 17 or Find the limit as x goes to infinity of (sin x) / x"
-                className="w-full bg-slate-900/50 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-xl p-4 text-sm focus:outline-none transition-all duration-300 resize-none font-mono"
+                className="multilingual-text w-full bg-slate-900/50 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-xl p-4 text-sm focus:outline-none transition-all duration-300 resize-none"
               />
             </div>
           ) : activeTab === "image" ? (
@@ -464,10 +466,11 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
               </label>
               <textarea
                 rows={4}
+                dir={textDirection(studentAttempt)}
                 value={studentAttempt}
                 onChange={(e) => setStudentAttempt(e.target.value)}
                 placeholder="Paste your attempted solution to get the first wrong step and misconception."
-                className="w-full bg-slate-900/40 border border-slate-900 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-lg p-3 text-xs focus:outline-none resize-none font-mono"
+                className="multilingual-text w-full bg-slate-900/40 border border-slate-900 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-lg p-3 text-xs focus:outline-none resize-none"
               />
             </div>
 
@@ -478,10 +481,11 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
               </label>
               <textarea
                 rows={4}
+                dir={textDirection(whiteboardNotes)}
                 value={whiteboardNotes}
                 onChange={(e) => setWhiteboardNotes(e.target.value)}
                 placeholder="Optional scratch work, diagram notes, or steps from a whiteboard session."
-                className="w-full bg-slate-900/40 border border-slate-900 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-lg p-3 text-xs focus:outline-none resize-none font-mono"
+                className="multilingual-text w-full bg-slate-900/40 border border-slate-900 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-lg p-3 text-xs focus:outline-none resize-none"
               />
             </div>
           </div>

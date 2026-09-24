@@ -53,10 +53,28 @@ body {
   text-rendering: auto;
 }
 
+.multilingual-text {
+  text-align: start;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.multilingual-text[dir="rtl"] {
+  font-family: Tahoma, "Noto Sans Arabic", "Noto Naskh Arabic", Arial, sans-serif;
+  line-height: 1.9;
+}
+
+.math-formula {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: KaTeX_Main, "Times New Roman", serif;
+}
+
 @media print {
   body { background: #fff !important; color: #111 !important; }
   .screen-backdrop, main > div:first-child, main > div:nth-child(2), header { display: none !important; }
   .print-result { color: #111 !important; }
+  .print-result, .print-result * { background: transparent !important; color: #111 !important; box-shadow: none !important; text-shadow: none !important; }
   .print-result > div { background: #fff !important; color: #111 !important; border-color: #bbb !important; box-shadow: none !important; }
   .print-result p, .print-result h2, .print-result h3, .print-result span { color: #111 !important; }
 }
