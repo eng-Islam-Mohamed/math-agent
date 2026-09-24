@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the public Math Agent frontend. It keeps the original interface while adapting text, photo, and voice solves to a Vercel serverless route. Gmail, Sheets, and the Python PDF generator are local-project features; the public result can be printed as a PDF.
 
 ## Getting Started
 

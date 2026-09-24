@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Math Agent | Live Portfolio Demo",
-  description: "Try a live mathematical reasoning demo with tiered models and a second AI review pass.",
+  title: "Maths AI Agent | Portfolio",
+  description: "Solve math problems from text, photos, or voice with step-by-step explanations and AI review.",
 };
 
 export default function RootLayout({

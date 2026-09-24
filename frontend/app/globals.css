@@ -52,3 +52,11 @@ body {
   line-height: 1.2;
   text-rendering: auto;
 }
+
+@media print {
+  body { background: #fff !important; color: #111 !important; }
+  .screen-backdrop, main > div:first-child, main > div:nth-child(2), header { display: none !important; }
+  .print-result { color: #111 !important; }
+  .print-result > div { background: #fff !important; color: #111 !important; border-color: #bbb !important; box-shadow: none !important; }
+  .print-result p, .print-result h2, .print-result h3, .print-result span { color: #111 !important; }
+}

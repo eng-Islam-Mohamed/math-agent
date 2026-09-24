@@ -127,7 +127,7 @@ export default function FileDropzone({
                 Drag and drop your math {type} here
               </p>
               <p className="text-xs text-slate-500">
-                or click to browse ({type === "image" ? "PNG, JPG, WEBP" : "MP3, WAV, M4A"})
+                or click to browse ({type === "image" ? "PNG, JPG, WEBP" : "MP3, WAV, M4A, WEBM"}; up to 3 MB)
               </p>
             </div>
           </motion.div>

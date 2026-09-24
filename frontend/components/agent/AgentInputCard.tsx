@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, FileText, Image as ImageIcon, Music, Mail, AlertCircle, BookOpen, Shield, Compass, GraduationCap, Zap, Check, Mic, Square, Trash2, Brain, PenTool, ClipboardCheck } from "lucide-react";
+import { Sparkles, FileText, Image as ImageIcon, Music, AlertCircle, BookOpen, Shield, Compass, GraduationCap, Zap, Check, Mic, Square, Trash2, Brain, PenTool, ClipboardCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import FileDropzone from "./FileDropzone";
 import { AdvancedSolveOptions, InputType } from "../../lib/types";
@@ -28,14 +28,6 @@ const SOLUTION_MODES = [
   { id: "Socratic Tutor Mode", name: "Socratic Tutor", desc: "Guided hints path", icon: Brain }
 ];
 
-const PDF_STYLES = [
-  { id: "Clean Academic", name: "Clean Academic" },
-  { id: "Luxury Dark", name: "Luxury Dark" },
-  { id: "Exam Sheet", name: "Exam Sheet" },
-  { id: "Professor Notes", name: "Professor Notes" },
-  { id: "Minimal LaTeX", name: "Minimal LaTeX" }
-];
-
 const CURRICULA = ["General", "Common Core", "AP Calculus", "IB Math", "A-levels", "University Calculus", "Linear Algebra", "Real Analysis"];
 const EXPLANATION_STYLES = ["Explain like I am 12", "High school exam", "University rigorous", "Visual intuition", "No shortcuts", "Fast final answer", "Professor-style proof"];
 const TUTOR_DEPTHS = ["Light hints", "Guided", "No-spoiler", "Rescue mode"];
@@ -44,9 +36,7 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
   const [activeTab, setActiveTab] = useState<InputType>("text");
   const [textProblem, setTextProblem] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [email, setEmail] = useState("");
   const [solutionMode, setSolutionMode] = useState("Full Explanation Mode");
-  const [pdfStyle, setPdfStyle] = useState("Clean Academic");
   const [curriculum, setCurriculum] = useState("General");
   const [explanationStyle, setExplanationStyle] = useState("University rigorous");
   const [tutorDepth, setTutorDepth] = useState("Guided");
@@ -81,8 +71,10 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
       };
 
       recorder.onstop = () => {
-        const audioBlob = new Blob(chunks, { type: "audio/wav" });
-        const audioFile = new File([audioBlob], "voice_memo.wav", { type: "audio/wav" });
+        const mime = recorder.mimeType || "audio/webm";
+        const extension = mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "webm";
+        const audioBlob = new Blob(chunks, { type: mime });
+        const audioFile = new File([audioBlob], `voice_memo.${extension}`, { type: mime });
         setUploadedFile(audioFile);
         const url = URL.createObjectURL(audioBlob);
         setRecordedUrl(url);
@@ -97,7 +89,7 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
 
       const interval = setInterval(() => {
         setRecordingTime((prev) => {
-          if (prev >= 120) {
+          if (prev >= 60) {
             recorder.stop();
             setIsRecording(false);
             clearInterval(interval);
@@ -171,14 +163,23 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
       return;
     }
 
+    if (activeTab === "text" && textProblem.length > 800) {
+      setValidationError("Keep the problem under 800 characters for this public demo.");
+      return;
+    }
+    if (uploadedFile && uploadedFile.size > 3_000_000) {
+      setValidationError("Choose a file smaller than 3 MB for this public demo.");
+      return;
+    }
+
     // Call submit handler
     onSolve(
       activeTab,
       activeTab === "text" ? textProblem : uploadedFile!.name,
-      email,
+      "",
       uploadedFile,
       solutionMode,
-      pdfStyle,
+      "Browser PDF",
       {
         curriculum,
         explanationStyle,
@@ -360,7 +361,7 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
                           <Mic size={24} />
                           <span className="absolute inset-0 rounded-full border border-blue-500/30 group-hover:scale-125 transition duration-300 pointer-events-none" />
                         </button>
-                        <span className="text-xs text-slate-500">Click to start recording (maximum 2 minutes)</span>
+                        <span className="text-xs text-slate-500">Click to start recording (maximum 1 minute)</span>
                       </div>
                     )}
                   </div>
@@ -368,7 +369,7 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
                   <div className="w-full">
                     <FileDropzone
                       type="audio"
-                      accept="audio/mp3, audio/wav, audio/mpeg, audio/ogg, audio/x-m4a"
+                      accept="audio/mp3, audio/wav, audio/mpeg, audio/ogg, audio/x-m4a, audio/webm"
                       selectedFile={uploadedFile}
                       onFileSelect={setUploadedFile}
                     />
@@ -484,48 +485,6 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
               />
             </div>
           </div>
-        </div>
-
-        {/* PDF Style Selector */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            PDF Export Theme Style
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {PDF_STYLES.map((style) => {
-              const isSelected = pdfStyle === style.id;
-              return (
-                <button
-                  key={style.id}
-                  type="button"
-                  onClick={() => setPdfStyle(style.id)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-200 ${
-                    isSelected
-                      ? "border-indigo-500 bg-indigo-500/10 text-indigo-400"
-                      : "border-slate-900 bg-slate-900/10 hover:border-slate-800 text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  {style.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Email Recipient Input */}
-        <div className="space-y-2">
-          <label htmlFor="email" className="flex items-center space-x-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            <Mail size={12} />
-            <span>Email Report Delivery (Optional)</span>
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="islambenaboud007@gmail.com"
-            className="w-full bg-slate-900/50 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 focus:border-blue-500/50 text-slate-200 placeholder-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none transition-all duration-300"
-          />
         </div>
 
         {/* Validation Errors */}
