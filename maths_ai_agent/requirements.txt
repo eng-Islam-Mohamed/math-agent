@@ -1,0 +1,14 @@
+langgraph
+langchain-core
+openai
+google-genai
+python-dotenv
+pydantic
+sympy
+gspread
+gspread-formatting
+google-api-python-client
+google-auth
+google-auth-oauthlib
+playwright
+jinja2

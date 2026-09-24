@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+outputs/pdfs/*
+outputs/backups/*
+token.json
+credentials.json
+.pytest_cache/

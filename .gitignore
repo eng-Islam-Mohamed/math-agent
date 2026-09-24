@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+**/credentials.json
+**/token.json
+**/token.backup.*
+**/service_account.json
+**/outputs/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/node_modules/
+**/.next/
+**/.vercel/
+*.log
+
