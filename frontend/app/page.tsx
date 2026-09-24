@@ -33,7 +33,10 @@ export default function Home() {
         body: JSON.stringify({ problem }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The solver is unavailable.");
+      if (response.status === 429 || response.status === 403) {
+        throw new Error("Demo limit reached. Please try again in ten minutes.");
+      }
+      if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "The solver is unavailable.");
       setResult(data as Result);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "The solver is unavailable.");
