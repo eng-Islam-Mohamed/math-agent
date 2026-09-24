@@ -4,9 +4,11 @@ Math Agent is a mathematics solving workspace with complexity-based model routin
 
 ## Public portfolio demo
 
+Live site: https://math-agent-demo.vercel.app
+
 `frontend/` is the Vercel demo. It accepts **text problems** and displays a live answer and an independent AI review. Its server-side route never exposes the OpenRouter key to visitors. Image, audio, Google delivery, and the richer PDF workflow remain in the original Python application and are not enabled in the public demo.
 
-The public review is an AI review, not a formal proof. Browser Print can save a result as a PDF. Public requests must be protected by a Vercel Firewall rate-limit rule and an OpenRouter spending limit.
+The public review is an AI review, not a formal proof. Browser Print can save a result as a PDF. The Vercel Firewall currently limits the solve route to three requests per IP every ten minutes. An OpenRouter key spending cap is recommended for an account-wide cost ceiling.
 
 ### Run locally
 
