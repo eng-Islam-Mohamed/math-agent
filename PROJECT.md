@@ -320,9 +320,9 @@ Determines if input is plain text or media. If it is plain text, sanitizes white
 ---
 
 ### Node 2: `gemini_extractor.py`
-Uses **Gemini 2.5 Flash** (via `google-genai` / `gemini-2.5-flash` model) to parse media.
+Uses **Gemini 3.1 Flash Lite** through OpenRouter to parse media.
 * **Image extraction**: Evaluates layout, detects handwritten formulas, and outputs clean LaTeX equations wrapped in standard delimiters.
-* **Audio extraction**: Transcribes the recording using OpenRouter's speech-to-text API (with `openai/whisper-large-v3` model) to transcribe mathematical problem descriptions spoken by the user.
+* **Audio extraction**: Transcribes spoken mathematical problems with `google/gemini-3.1-flash-lite` through OpenRouter's chat completions audio input.
 
 ---
 

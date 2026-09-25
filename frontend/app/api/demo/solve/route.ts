@@ -51,19 +51,17 @@ async function chat(model: string, system: string, content: MessageContent, maxT
 async function transcribe(file: File): Promise<string> {
   const format = file.name.split(".").pop()?.toLowerCase() || "";
   if (!["mp3", "wav", "m4a", "ogg", "webm"].includes(format)) throw new Error("Unsupported audio format");
-  const response = await fetch("https://openrouter.ai/api/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: process.env.TRANSCRIPTION_MODEL || "openai/whisper-1",
-      input_audio: { data: Buffer.from(await file.arrayBuffer()).toString("base64"), format },
-    }),
-    signal: AbortSignal.timeout(45_000), cache: "no-store",
-  });
-  if (!response.ok) throw new Error(`Audio transcription returned ${response.status}`);
-  const data = await response.json();
-  if (typeof data?.text !== "string" || !data.text.trim()) throw new Error("No speech detected");
-  return data.text.trim();
+  const transcript = (await chat(
+    "google/gemini-3.1-flash-lite",
+    "Transcribe the spoken mathematical problem in its original language. Convert spoken numbers and operations into mathematical notation. Do not solve it or invent unclear words. Return only the transcription, or UNREADABLE if the audio is unclear.",
+    [
+      { type: "text", text: "Transcribe this math problem accurately." },
+      { type: "input_audio", input_audio: { data: Buffer.from(await file.arrayBuffer()).toString("base64"), format } },
+    ],
+    500,
+  )).trim();
+  if (!transcript || transcript.toUpperCase() === "UNREADABLE") throw new Error("No clear speech detected");
+  return transcript;
 }
 
 function safeSolution(value: Record<string, unknown>): Solution {
