@@ -24,7 +24,7 @@ function parseJson(raw: string): Record<string, unknown> {
   return JSON.parse(raw.slice(start, end + 1));
 }
 
-async function chat(model: string, system: string, content: MessageContent, maxTokens: number): Promise<string> {
+async function chat(model: string, system: string, content: MessageContent, maxTokens: number, responseFormat?: Record<string, unknown>): Promise<string> {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -36,6 +36,7 @@ async function chat(model: string, system: string, content: MessageContent, maxT
     },
     body: JSON.stringify({
       model, temperature: 0.1, max_tokens: maxTokens,
+      ...(responseFormat ? { response_format: responseFormat } : {}),
       messages: [{ role: "system", content: system }, { role: "user", content }],
     }),
     signal: AbortSignal.timeout(50_000),
@@ -149,13 +150,16 @@ export async function POST(request: NextRequest) {
 
     let review = { correct: false, note: "Independent AI review was unavailable. Check the answer yourself." };
     try {
+      const reviewLanguage = /\b(prove|proof|solve|show|find|if|then)\b/i.test(problem)
+        ? "English" : "the same language as the solution summary";
       const checked = parseJson(await chat(
         process.env.REVIEW_MODEL || "openai/gpt-5.4-mini",
-        "Review the mathematics independently. Write the note in the SAME LANGUAGE as the problem. Return ONLY valid JSON with boolean correct and a brief string note. Escape LaTeX backslashes correctly. If uncertain, set correct to false. This is an AI review, not formal proof.",
-        `Problem: ${problem}\nSteps: ${solved.steps.join("; ")}\nAnswer: ${solved.answer}`,
-        350,
+        "Review the mathematical reasoning independently. A submitted request can contain a false claim: if the solution correctly refutes it and proves the true contrary claim, mark correct true. Do not mark a sound refutation false merely because it rejects the requested conclusion. Mark correct false for an actual mathematical error or unsupported conclusion. Use plain text or Unicode math symbols in the note, without LaTeX commands. If uncertain, set correct to false. This is an AI review, not formal proof.",
+        `Review language: ${reviewLanguage}. Problem: ${problem}\nSolution summary: ${solved.summary}\nSteps: ${solved.steps.join("; ")}\nAnswer: ${solved.answer}`,
+        500,
+        { type: "json_schema", json_schema: { name: "math_review", strict: true, schema: { type: "object", properties: { correct: { type: "boolean" }, note: { type: "string" } }, required: ["correct", "note"], additionalProperties: false } } },
       ));
-      review = { correct: checked.correct === true, note: typeof checked.note === "string" ? checked.note : "Review gave no explanation." };
+      review = { correct: checked.correct === true, note: typeof checked.note === "string" ? checked.note.replace(/[\u0000-\u001F\u007F]/g, " ").trim() : "Review gave no explanation." };
     } catch {
       // Keep the solution available and label it unreviewed.
     }

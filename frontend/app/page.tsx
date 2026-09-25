@@ -96,7 +96,7 @@ export default function Home() {
           </div>
           <div className="w-full max-w-4xl space-y-5 rounded-2xl border border-slate-900 bg-slate-950/80 p-6 shadow-xl md:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0 flex-1"><p dir={textDirection(result.solution.field)} className="multilingual-text text-xs font-bold uppercase tracking-wider text-blue-400">{result.solution.field}</p><h2 dir={textDirection(result.solution.title)} className="multilingual-text mt-2 text-xl font-bold text-slate-100">{result.solution.title}</h2></div>
+              <div className="min-w-0 flex-1"><p dir={textDirection(result.solution.field)} className="multilingual-text text-xs font-bold uppercase tracking-wider text-blue-400">{result.solution.field}</p><div role="heading" aria-level={2} dir={textDirection(result.solution.title)} className="multilingual-text mt-2 text-xl font-bold text-slate-100">{renderMathAndText(result.solution.title)}</div></div>
               <button onClick={() => window.print()} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 print:hidden"><FileDown size={15} />Save as PDF</button>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4"><p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Problem read from your input</p><div dir={textDirection(result.cleanedProblem)} className="multilingual-text mt-2 whitespace-pre-wrap text-sm text-slate-200">{renderMathAndText(result.cleanedProblem)}</div></div>
