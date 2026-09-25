@@ -172,6 +172,10 @@ export default function AgentInputCard({ onSolve, isLoading }: AgentInputCardPro
       setValidationError("Choose a file smaller than 3 MB for this public demo.");
       return;
     }
+    if (solutionMode === "Mistake Diagnosis Mode" && !studentAttempt.trim()) {
+      setValidationError("Enter your attempted solution to use Mistake Diagnosis Mode.");
+      return;
+    }
 
     // Call submit handler
     onSolve(

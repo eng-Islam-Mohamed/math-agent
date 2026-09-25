@@ -10,6 +10,7 @@ interface SolutionPreviewProps {
   finalAnswer: string;
   summary: string;
   alternativeSolutions?: AlternativeSolution[];
+  showDerivation?: boolean;
 }
 
 // Shared renderer for model output and the extracted problem.
@@ -71,6 +72,7 @@ export default function SolutionPreview({
   finalAnswer,
   summary,
   alternativeSolutions,
+  showDerivation = true,
 }: SolutionPreviewProps) {
   const [openAltIndex, setOpenAltIndex] = useState<number | null>(null);
   const plainArabicEquation = /^\s*[\u0621-\u064A]\s*=\s*[-+\d\u0660-\u0669.,]+\s*$/u.test(finalAnswer);
@@ -84,12 +86,12 @@ export default function SolutionPreview({
       </div>
 
       {/* Full Detailed Solution */}
-      <div className="bg-slate-950/60 backdrop-blur-xl border border-slate-900 rounded-2xl p-6 md:p-8 space-y-4">
+      {showDerivation && <div className="bg-slate-950/60 backdrop-blur-xl border border-slate-900 rounded-2xl p-6 md:p-8 space-y-4">
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detailed Derivation</h3>
         <div dir={textDirection(fullSolution)} className="multilingual-text prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed space-y-2">
           {renderMathAndText(fullSolution)}
         </div>
-      </div>
+      </div>}
 
       {/* Final Answer Highlight Box */}
       <div className="relative bg-gradient-to-r from-blue-900/10 to-indigo-900/10 border border-blue-500/20 rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-2 overflow-hidden">
