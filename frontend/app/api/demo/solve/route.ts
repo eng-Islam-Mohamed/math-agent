@@ -68,6 +68,19 @@ const LEARNING_SCHEMA = {
   },
 };
 
+const NO_SPOILER_SCHEMA = {
+  type: "json_schema",
+  json_schema: {
+    name: "no_spoiler_hints",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: { tutorHints: { type: "array", items: { type: "object", properties: { prompt: { type: "string" }, rescueHint: { type: "string" } }, required: ["prompt", "rescueHint"], additionalProperties: false } } },
+      required: ["tutorHints"], additionalProperties: false,
+    },
+  },
+};
+
 function selected<T extends string>(value: FormDataEntryValue | null, choices: readonly T[], fallback: T): T {
   return typeof value === "string" && choices.includes(value as T) ? value as T : fallback;
 }
@@ -78,6 +91,16 @@ function cleanText(value: unknown, max = 600): string {
 
 function cleanList(value: unknown): string[] {
   return Array.isArray(value) ? value.map((item) => cleanText(item, 250)).filter(Boolean).slice(0, 5) : [];
+}
+
+function translatedNoSpoilerHints(value: Record<string, unknown>): TutorHint[] | null {
+  if (!Array.isArray(value.tutorHints) || value.tutorHints.length !== 3) return null;
+  const hints = value.tutorHints.map((item) => {
+    const hint = item as Record<string, unknown>;
+    return { prompt: cleanText(hint?.prompt, 350), rescueHint: cleanText(hint?.rescueHint, 350) };
+  });
+  if (hints.some((hint) => !hint.prompt || !hint.rescueHint || /[0-9\u0660-\u0669]/u.test(hint.prompt + hint.rescueHint))) return null;
+  return hints;
 }
 
 function safeLearning(value: Record<string, unknown>, requireDiagnosis: boolean, tutorDepth: string): DemoLearning {
@@ -263,6 +286,14 @@ export async function POST(request: NextRequest) {
       LEARNING_SCHEMA,
     ).then((raw) => safeLearning(parseJson(raw), Boolean(studentAttempt), tutorDepth));
 
+    const noSpoilerPromise = tutorDepth === "No-spoiler" ? chat(
+      "google/gemini-3.1-flash-lite",
+      "Identify the language of the submitted mathematical problem. Translate exactly three generic Socratic hints and their help text into that language. Preserve their meaning and order. Do not add problem-specific facts, numbers, calculations, answers, or extra hints. Return only the requested JSON.",
+      `Problem language sample: ${problem}\nHint 1: What does the original problem ask you to find or prove? Help: Identify the unknown or the exact statement to establish before calculating.\nHint 2: Which definition, property, or operation might help you begin? Help: Look for a rule that applies to the given information; choose only the first valid move.\nHint 3: Can you justify your next step and check it against the original problem? Help: Test your step for logical or algebraic equivalence before continuing on your own.`,
+      700,
+      NO_SPOILER_SCHEMA,
+    ).then((raw) => translatedNoSpoilerHints(parseJson(raw))).catch(() => null) : Promise.resolve(null);
+
     const reviewPromise = (async () => {
       let review = { correct: false, note: "Independent AI review was unavailable. Check the answer yourself." };
       try {
@@ -281,7 +312,8 @@ export async function POST(request: NextRequest) {
       }
       return review;
     })();
-    const [learning, review] = await Promise.all([learningPromise, reviewPromise]);
+    const [learning, review, noSpoilerHints] = await Promise.all([learningPromise, reviewPromise, noSpoilerPromise]);
+    if (noSpoilerHints) learning.tutorHints = noSpoilerHints;
     return Response.json({
       inputType, cleanedProblem: problem, tier, solution: solved, learning, review,
       selected: { solutionMode, curriculum, explanationStyle, tutorDepth, hasStudentAttempt: Boolean(studentAttempt), hasWhiteboardNotes: Boolean(whiteboardNotes) },
